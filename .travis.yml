@@ -1,12 +1,31 @@
 language: cpp
+
+os:
+  - linux
+
+compiler:
+  - gcc
+  - clang
+
+env:
+  matrix:
+    - BUILD_TYPE=Release
+    - BUILD_TYPE=Debug
+
+before_install:
+  - if [ "$CXX" = "g++" ]; then sudo apt-get install -y g++; fi
+  - if [ "$CXX" = "clang++" ]; then sudo apt-get install -y clang; fi
+
+install:
+  - sudo apt-get update
+  - sudo apt-get install -y libgtest-dev cmake cmake-data
+
 script:
-- cmake -H. -B_build -DCMAKE_INSTALL_PREFIX=_install
-- cmake --build _build
-- cmake --build _build --target install
-addons:
-  apt:
-    sources:
-      - george-edison55-precise-backports
-    packages:
-      - cmake
-      - cmake-data
+  - mkdir -p _build && cd _build
+  - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=_install
+  - cmake --build .
+  - cmake --build . --target install
+  - ctest --output-on-failure
+
+notifications:
+  email: false
